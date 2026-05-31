@@ -11,6 +11,7 @@ import numpy as np
 import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.transforms as transforms
 from matplotlib.gridspec import GridSpec
 import matplotlib.gridspec as gridspec
 import cartopy.crs as ccrs
@@ -444,5 +445,8 @@ def load_state(ns=None, path=STATE_FILE):
         data = _pickle.load(f)
     if ns is not None:
         ns.update(data)
+    keys = sorted(data.keys())
+    preview = ", ".join(keys[:12]) + (" ..." if len(keys) > 12 else "")
     print(f"[load_state] loaded {len(data)} variables from {path}")
+    print(f"[load_state] available: {preview}")
     return data
