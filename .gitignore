@@ -21,3 +21,6 @@ env/
 # logs / secrets
 *.log
 .env
+
+# computed intermediate state (regenerable)
+processed_data/

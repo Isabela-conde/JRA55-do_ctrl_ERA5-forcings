@@ -375,3 +375,74 @@ def trend_obs_percentile(data): # find trend of percentile data
         trends[i] = np.polyfit(time_axis, y, 1)[0]  # slope
 
     return xr.DataArray(trends, coords={'area': data.area}, dims='area', name='sst_trend')
+
+
+# ---------------------------------------------------------------------------
+# Lightweight save / load of computed variables between notebooks.
+#
+#   Pattern:  "compute" notebooks save their results to disk; "plotting"
+#   notebooks load them, instead of recomputing. Run the compute/loader
+#   notebooks first, then the plotting ones.
+#
+#   At the top of a notebook (after `from functions import *`):
+#       load_state(globals())
+#   At the bottom of a notebook:
+#       save_state(globals())
+#
+# Variables are stored (accumulating) in  <repo>/processed_data/state.pkl
+# Dask-backed xarray objects stay lazy, so this does not force big data
+# into memory. Anything unpicklable (modules, functions, regridders) is skipped.
+# ---------------------------------------------------------------------------
+import os as _os, pickle as _pickle, inspect as _inspect, types as _types
+_REPO_DIR = _os.path.dirname(_os.path.abspath(__file__))
+STATE_DIR = _os.path.join(_REPO_DIR, "processed_data")
+STATE_FILE = _os.path.join(STATE_DIR, "state.pkl")
+
+
+def save_state(ns, names=None, path=STATE_FILE):
+    """Save data variables from a namespace (pass globals()) so other
+    notebooks can load them. Accumulates into the existing state file."""
+    _os.makedirs(STATE_DIR, exist_ok=True)
+    data = {}
+    if _os.path.exists(path):
+        try:
+            with open(path, "rb") as f:
+                data = _pickle.load(f)
+        except Exception:
+            data = {}
+    keys = names if names is not None else list(ns.keys())
+    saved = []
+    for k in keys:
+        if k.startswith("_"):
+            continue
+        v = ns.get(k, None)
+        if v is None:
+            continue
+        if isinstance(v, _types.ModuleType):
+            continue
+        if _inspect.isfunction(v) or _inspect.isclass(v) or _inspect.isbuiltin(v) or _inspect.ismethod(v):
+            continue
+        try:
+            _pickle.dumps(v)
+        except Exception:
+            continue
+        data[k] = v
+        saved.append(k)
+    with open(path, "wb") as f:
+        _pickle.dump(data, f)
+    print(f"[save_state] saved {len(saved)} variables -> {path}")
+    return path
+
+
+def load_state(ns=None, path=STATE_FILE):
+    """Load variables saved by earlier notebooks. If a namespace (globals())
+    is passed, inject them into it; always returns the dict."""
+    if not _os.path.exists(path):
+        print(f"[load_state] no saved state yet ({path}). Run the compute/loader notebooks first.")
+        return {}
+    with open(path, "rb") as f:
+        data = _pickle.load(f)
+    if ns is not None:
+        ns.update(data)
+    print(f"[load_state] loaded {len(data)} variables from {path}")
+    return data
