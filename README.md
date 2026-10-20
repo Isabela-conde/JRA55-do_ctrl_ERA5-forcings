@@ -29,14 +29,3 @@ focused notebooks. The original folder is left untouched as the source of truth.
   - `obs_wind_uas_vas_trends.ipynb` — NOAA blended-wind uas/vas input trends (saved as OM2 forcing inputs).
 - **`functions.py`** — shared helpers (`find_trend_values`, `pacific_mask`, `quantiles_xhist`, `find_trend_percentile`, `calculate_confidence_intervals_all`, …). Each notebook starts with a path-aware `from functions import *`.
 
-## Notes
-
-- Each notebook opens with a title cell summarising its contents.
-- **Outputs were stripped** — run the notebooks (in your analysis3 / conda kernel with `xarray`, `cartopy`, `xesmf`, …) to regenerate figures.
-- Split out of long linear notebooks, so a focused notebook may need a data-loading cell
-  added if it references a variable computed in another section.
-- **Data paths** in the notebooks currently point at local `~/Desktop/data/…`. Update these to your Gadi `/g/data` or `/scratch` locations when running there.
-
-## Not included
-The `ACCESS-OM2_forcing_perturbation_tutorial.ipynb` remains in the original
-`ACCESS-OM2-Atmosphere-Perturb` folder — it was open/locked during processing and you chose to leave it.
