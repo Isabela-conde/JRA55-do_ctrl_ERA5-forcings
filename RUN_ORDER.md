@@ -4,8 +4,6 @@ These notebooks came from long linear notebooks, so some use variables computed 
 others. Each notebook **loads** shared variables at the top (`load_state`) and **saves**
 its own at the bottom (`save_state`), accumulating in `processed_data/state.pkl`.
 
-**Rule of thumb:** run the *compute* notebooks first, then the *plotting* ones.
-Run each top-to-bottom so it reaches its `save_state` cell.
 
 ## Phase 1 — compute / loaders (run first, in this order)
 
